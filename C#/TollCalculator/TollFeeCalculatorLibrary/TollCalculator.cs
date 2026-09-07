@@ -1,11 +1,16 @@
-﻿using System;
-using System.Globalization;
-using TollFeeCalculatorLibrary;
-
-namespace TollFeeCalculatorLibrary;
+﻿namespace TollFeeCalculatorLibrary;
 
 public class TollCalculator
 {
+    private string[] TollFreeVehicleStrings;
+
+    public TollCalculator()
+    {
+        TollFreeVehicleStrings = Enum
+            .GetValues<TollFreeVehicles>()
+            .Select(x => x.ToString())
+            .ToArray();
+    }
 
     /**
      * Calculate the total toll fee for one day
@@ -25,7 +30,7 @@ public class TollCalculator
             int tempFee = GetTollFee(intervalStart, vehicle);
 
             long diffInMillies = date.Millisecond - intervalStart.Millisecond;
-            long minutes = diffInMillies/1000/60;
+            long minutes = diffInMillies / 1000 / 60;
 
             if (minutes <= 60)
             {
@@ -64,16 +69,11 @@ public class TollCalculator
     private bool IsTollFreeVehicle(Vehicle vehicle)
     {
         if (vehicle == null) return false;
-        String vehicleType = vehicle.GetVehicleType();
-        return vehicleType.Equals(TollFreeVehicles.Motorbike.ToString()) ||
-               vehicleType.Equals(TollFreeVehicles.Tractor.ToString()) ||
-               vehicleType.Equals(TollFreeVehicles.Emergency.ToString()) ||
-               vehicleType.Equals(TollFreeVehicles.Diplomat.ToString()) ||
-               vehicleType.Equals(TollFreeVehicles.Foreign.ToString()) ||
-               vehicleType.Equals(TollFreeVehicles.Military.ToString());
+
+        return TollFreeVehicleStrings.Contains(vehicle.GetVehicleType());
     }
 
-    private Boolean IsTollFreeDate(DateTime date)
+    private static bool IsTollFreeDate(DateTime date)
     {
         int year = date.Year;
         int month = date.Month;
