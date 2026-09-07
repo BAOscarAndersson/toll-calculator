@@ -5,86 +5,56 @@ namespace TollFeeCalculatorTests;
 public class TollCalculatorTests
 {
     [Fact]
-    public void Test1()
+    public void GetTollFeeVehicleAndDates()
     {
-        var vehicles = GenerateVehicles()
-            .Select(x => x.GetVehicleType())
+        var vehicles = TestInputs.Vehicles();
+
+        var dates = TestInputs.DateTimes();
+
+        var testData = vehicles
+            .SelectMany(_ => dates, (vehicle, date) => (vehicle, date))
             .ToArray();
 
-        string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+        var calc = new TollCalculator();
 
-        string vehiclesFilePath = Path.Combine(baseDirectory, "vehicles.txt");
-
-        File.WriteAllLines(vehiclesFilePath, vehicles);
-
-        var dates = GenerateDateTimes()
-            .Select(x => string.Join(',', x))
+        var outputs = testData
+            .Select(x => calc.GetTollFee(x.vehicle, x.date))
+            .Select(x => x.ToString())
             .ToArray();
 
-        var datesFilePath = @".\dates.txt";
+        var vehicleAndDatesPath = @".\vehicleAndDates.txt";
 
-        File.WriteAllLines(datesFilePath, dates);
+        string content = string.Join(",", outputs);
+
+        File.WriteAllText(vehicleAndDatesPath, content);
 
         Console.WriteLine("Done");
     }
 
-    IEnumerable<DateTime[]> GenerateDateTimes()
+    [Fact]
+    public void GetTollFeeDateAndVehicle()
     {
-       return Enumerable
-            .Range(0, 13)
-            .Select(x => GenerateDateTimes(x));
-    }
+        var vehicles = TestInputs.Vehicles();
 
-    DateTime[] GenerateDateTimes(int nrToGenerate)
-    {
-        return Enumerable
-            .Range(0, nrToGenerate)
-            .Select(_ => RandomDateTime())
+        var dates = TestInputs.DateTimes();
+        
+        var testData = vehicles
+            .SelectMany(_ => dates, (vehicle, date) => (vehicle, date))
             .ToArray();
 
-        static DateTime RandomDateTime()
-        {
-            long minTicks = DateTime.MinValue.Ticks;
-            long maxTicks = DateTime.MaxValue.Ticks;
+        var calc = new TollCalculator();
 
-            double range = (double)(maxTicks - minTicks);
-            long randomOffset = (long)(Random.Shared.NextDouble() * range);
-
-            return new DateTime(minTicks + randomOffset);
-        }
-    }
-
-    IEnumerable<Vehicle> GenerateVehicles()
-    {
-        IEnumerable<Vehicle> tollFreeVehicles = Enum
-            .GetValues<TollCalculator.TollFreeVehicles>()
+        var outputs = testData
+            .Select(x => calc.GetTollFee(x.date[0], x.vehicle))
             .Select(x => x.ToString())
-            .Select(x => new TestVehicle(x));
+            .ToArray();
 
-        IEnumerable<Vehicle> arbitraryVehicles = RandomVehicles(103, 13);
+        var dateAndVehiclePath = @".\dateAndVehicle.txt";
 
-        IEnumerable<Vehicle> t = tollFreeVehicles.Concat(arbitraryVehicles);
+        string content = string.Join(",", outputs);
 
-        return t;
-    }
+        File.WriteAllText(dateAndVehiclePath, content);
 
-    IEnumerable<Vehicle> RandomVehicles(int nrToGenerate, int maxLength)
-    {
-        string chars = @""" !\""#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"";";
-
-        return Enumerable
-            .Range(0, nrToGenerate)
-            .Select(_ => Random.Shared.GetString(chars, maxLength))
-            .Select(x => new TestVehicle(x));
-    }
-
-    class TestVehicle(string VehicleType) : Vehicle
-    {
-        readonly string vehicleType = VehicleType;
-
-        public string GetVehicleType()
-        {
-            return vehicleType;
-        }
+        Console.WriteLine("Done");
     }
 }
