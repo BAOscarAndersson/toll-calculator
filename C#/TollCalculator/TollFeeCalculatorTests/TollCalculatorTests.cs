@@ -4,57 +4,52 @@ namespace TollFeeCalculatorTests;
 
 public class TollCalculatorTests
 {
-    [Fact]
-    public void GetTollFeeVehicleAndDates()
+    readonly (Vehicle vehicle, DateTime[] date)[] testData;
+    readonly TollCalculator sut;
+
+    public TollCalculatorTests()
     {
-        var vehicles = TestInputs.Vehicles();
+        IEnumerable<Vehicle> vehicles = TestInputs.Vehicles();
 
-        var dates = TestInputs.DateTimes();
+        IEnumerable<DateTime[]> dates = TestInputs.DateTimes();
 
-        var testData = vehicles
+        testData = vehicles
             .SelectMany(_ => dates, (vehicle, date) => (vehicle, date))
             .ToArray();
 
-        var calc = new TollCalculator();
-
-        var outputs = testData
-            .Select(x => calc.GetTollFee(x.vehicle, x.date))
-            .Select(x => x.ToString())
-            .ToArray();
-
-        var vehicleAndDatesPath = @".\vehicleAndDates.txt";
-
-        string content = string.Join(",", outputs);
-
-        File.WriteAllText(vehicleAndDatesPath, content);
-
-        Console.WriteLine("Done");
+        sut = new();
     }
 
     [Fact]
-    public void GetTollFeeDateAndVehicle()
+    public void GetTollFeeVehicleAndDatesCharacterization()
     {
-        var vehicles = TestInputs.Vehicles();
-
-        var dates = TestInputs.DateTimes();
-        
-        var testData = vehicles
-            .SelectMany(_ => dates, (vehicle, date) => (vehicle, date))
+        int[] outputs = testData
+            .Select(x => sut.GetTollFee(x.vehicle, x.date))
             .ToArray();
 
-        var calc = new TollCalculator();
+        int[] expected = TestOutputs.VehicleAndDates();
 
-        var outputs = testData
-            .Select(x => calc.GetTollFee(x.date[0], x.vehicle))
-            .Select(x => x.ToString())
+        Assert.Equal(outputs, expected);
+    }
+
+    [Fact]
+    public void GetTollFeeDateAndVehicleCharacterization()
+    {
+        int[] outputs = testData
+            .Select(x => sut.GetTollFee(x.date[0], x.vehicle))
             .ToArray();
 
-        var dateAndVehiclePath = @".\dateAndVehicle.txt";
+        int[] expected = TestOutputs.DateAndVehicle();
 
-        string content = string.Join(",", outputs);
+        Assert.Equal(outputs, expected);
+    }
 
-        File.WriteAllText(dateAndVehiclePath, content);
-
-        Console.WriteLine("Done");
+    [Fact]
+    public void GetTollFeeVehicleAndDatesThrows_WhenDatesIsEmpty()
+    {
+        Assert.Throws<IndexOutOfRangeException>(() =>
+        {
+            int t = sut.GetTollFee(new TestVehicle(""), []);
+        });
     }
 }

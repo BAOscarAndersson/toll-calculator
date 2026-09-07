@@ -27,6 +27,7 @@ internal class TestInputs
     }
 
     const string vechiles = """
+        a
         Motorbike
         Tractor
         Emergency
