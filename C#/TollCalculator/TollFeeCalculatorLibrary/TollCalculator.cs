@@ -98,7 +98,7 @@ public class TollCalculator
         return false;
     }
 
-    private enum TollFreeVehicles
+    public enum TollFreeVehicles
     {
         Motorbike = 0,
         Tractor = 1,
