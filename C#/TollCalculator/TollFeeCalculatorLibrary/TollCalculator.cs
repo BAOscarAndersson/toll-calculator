@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Globalization;
-using TollFeeCalculator;
+using TollFeeCalculatorLibrary;
+
+namespace TollFeeCalculatorLibrary;
 
 public class TollCalculator
 {
@@ -40,18 +42,6 @@ public class TollCalculator
         return totalFee;
     }
 
-    private bool IsTollFreeVehicle(Vehicle vehicle)
-    {
-        if (vehicle == null) return false;
-        String vehicleType = vehicle.GetVehicleType();
-        return vehicleType.Equals(TollFreeVehicles.Motorbike.ToString()) ||
-               vehicleType.Equals(TollFreeVehicles.Tractor.ToString()) ||
-               vehicleType.Equals(TollFreeVehicles.Emergency.ToString()) ||
-               vehicleType.Equals(TollFreeVehicles.Diplomat.ToString()) ||
-               vehicleType.Equals(TollFreeVehicles.Foreign.ToString()) ||
-               vehicleType.Equals(TollFreeVehicles.Military.ToString());
-    }
-
     public int GetTollFee(DateTime date, Vehicle vehicle)
     {
         if (IsTollFreeDate(date) || IsTollFreeVehicle(vehicle)) return 0;
@@ -69,6 +59,18 @@ public class TollCalculator
         else if (hour == 17 && minute >= 0 && minute <= 59) return 13;
         else if (hour == 18 && minute >= 0 && minute <= 29) return 8;
         else return 0;
+    }
+
+    private bool IsTollFreeVehicle(Vehicle vehicle)
+    {
+        if (vehicle == null) return false;
+        String vehicleType = vehicle.GetVehicleType();
+        return vehicleType.Equals(TollFreeVehicles.Motorbike.ToString()) ||
+               vehicleType.Equals(TollFreeVehicles.Tractor.ToString()) ||
+               vehicleType.Equals(TollFreeVehicles.Emergency.ToString()) ||
+               vehicleType.Equals(TollFreeVehicles.Diplomat.ToString()) ||
+               vehicleType.Equals(TollFreeVehicles.Foreign.ToString()) ||
+               vehicleType.Equals(TollFreeVehicles.Military.ToString());
     }
 
     private Boolean IsTollFreeDate(DateTime date)
