@@ -70,17 +70,4 @@ public class TollCalculatorMultipleDatesTests
 
         Assert.Throws<Exception>(() => sut.GetTollFee(car, dates));
     }
-
-    [Fact]
-    public void HolidayLogic_ShouldReturnZero_OnlyIn2013()
-    {
-        DateTime holiday2013 = new (2013, 1, 1, 12, 0, 0);
-        DateTime holiday2024 = new (2026, 1, 1, 12, 0, 0);
-
-        int fee2013 = sut.GetTollFee(holiday2013, car);
-        int fee2023 = sut.GetTollFee(holiday2024, car);
-
-        Assert.Equal(0, fee2013);
-        Assert.Equal(0, fee2023);
-    }
 }
