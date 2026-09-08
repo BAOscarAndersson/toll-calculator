@@ -1,8 +1,11 @@
-﻿namespace TollFeeCalculatorLibrary;
+﻿using static System.Runtime.InteropServices.JavaScript.JSType;
+
+namespace TollFeeCalculatorLibrary;
 
 public class TollCalculator
 {
     readonly string[] TollFreeVehicleStrings;
+    readonly int[] tollFee = new int[1440]; // There are 1440 minutes in a day.
 
     public TollCalculator()
     {
@@ -10,6 +13,35 @@ public class TollCalculator
             .GetValues<TollFreeVehicles>()
             .Select(x => x.ToString())
             .ToArray();
+
+        /* For the fun of it we use a LUT for toll fees.
+         * Could even be a thing in some high perf scenarios.
+         */
+        for (int m = 0; m < 1440; m++)
+            tollFee[m] = TollFee(m);
+
+        static int TollFee(int minutesFromMidnight)
+        {
+            return minutesFromMidnight switch
+            {
+                >= 360 and < 390 => 8,  // 06:00 - 06:29
+                >= 390 and < 420 => 13, // 06:30 - 06:59
+                >= 420 and < 480 => 18, // 07:00 - 07:59
+                >= 480 and < 510 => 13, // 08:00 - 08:29
+                >= 510 and < 540 => 8,  // 08:30 - 08:59
+                >= 570 and < 600 => 8,  // 09:30 - 09:59
+                >= 630 and < 660 => 8,  // 10:30 - 10:59
+                >= 690 and < 720 => 8,  // 11:30 - 11:59
+                >= 750 and < 780 => 8,  // 12:30 - 12:59
+                >= 810 and < 840 => 8,  // 13:30 - 13:59
+                >= 870 and < 900 => 8,  // 14:30 - 14:59
+                >= 900 and < 930 => 13, // 15:00 - 15:29
+                >= 930 and < 1020 => 18, // 15:30 - 16:59
+                >= 1020 and < 1080 => 13, // 17:00 - 17:59
+                >= 1080 and < 1110 => 8,  // 18:00 - 18:29
+                _ => 0
+            };
+        }
     }
 
     /**
@@ -22,12 +54,14 @@ public class TollCalculator
 
     public int GetTollFee(Vehicle vehicle, DateTime[] dates)
     {
+        if (IsTollFreeVehicle(vehicle)) return 0;
+
         DateTime intervalStart = dates[0];
         int totalFee = 0;
         foreach (DateTime date in dates)
         {
-            int nextFee = GetTollFee(date, vehicle);
-            int tempFee = GetTollFee(intervalStart, vehicle);
+            int nextFee = GetTollFee(date);
+            int tempFee = GetTollFee(intervalStart);
 
             long diffInMillies = date.Millisecond - intervalStart.Millisecond;
             long minutes = diffInMillies / 1000 / 60;
@@ -57,30 +91,22 @@ public class TollCalculator
         return GetTollFee(hour, minute);
     }
 
+    int GetTollFee(DateTime date)
+    {
+        if (IsTollFreeDate(date)) return 0;
+
+        int hour = date.Hour;
+        int minute = date.Minute;
+
+        return GetTollFee(hour, minute);
+    }
+
     int GetTollFee(int hour, int minute)
     {
         // Convert everything to total minutes from midnight
         int m = (hour * 60) + minute;
 
-        return m switch
-        {
-            >= 360 and < 390 => 8,  // 06:00 - 06:29
-            >= 390 and < 420 => 13, // 06:30 - 06:59
-            >= 420 and < 480 => 18, // 07:00 - 07:59
-            >= 480 and < 510 => 13, // 08:00 - 08:29
-            >= 510 and < 540 => 8,  // 08:30 - 08:59
-            >= 570 and < 600 => 8,  // 09:30 - 09:59
-            >= 630 and < 660 => 8,  // 10:30 - 10:59
-            >= 690 and < 720 => 8,  // 11:30 - 11:59
-            >= 750 and < 780 => 8,  // 12:30 - 12:59
-            >= 810 and < 840 => 8,  // 13:30 - 13:59
-            >= 870 and < 900 => 8,  // 14:30 - 14:59
-            >= 900 and < 930 => 13, // 15:00 - 15:29
-            >= 930 and < 1020 => 18, // 15:30 - 16:59
-            >= 1020 and < 1080 => 13, // 17:00 - 17:59
-            >= 1080 and < 1110 => 8,  // 18:00 - 18:29
-            _ => 0
-        };
+        return tollFee[m];
     }
 
     bool IsTollFreeVehicle(Vehicle vehicle)
