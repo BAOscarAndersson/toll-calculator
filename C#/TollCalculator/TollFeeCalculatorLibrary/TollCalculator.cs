@@ -4,6 +4,16 @@ public class TollCalculator
 {
     readonly string[] TollFreeVehicleStrings;
     readonly int[] tollFee = new int[1440]; // There are 1440 minutes in a day.
+    static readonly HashSet<(int Month, int Day)> FixedHolidays =
+    [
+        (1, 1),   // Nyårsdagen
+        (1, 6),   // Trettondedag jul
+        (5, 1),   // Första maj
+        (6, 6),   // Nationaldagen
+        (12, 25), // Juldagen
+        (12, 26)  // Annandag jul
+    ];
+
 
     public TollCalculator()
     {
@@ -71,51 +81,36 @@ public class TollCalculator
     {
         if (IsTollFreeDate(date)) return 0;
 
-        int hour = date.Hour;
-        int minute = date.Minute;
-
         // Convert everything to total minutes from midnight
-        int m = (hour * 60) + minute;
+        int m = (date.Hour * 60) + date.Minute;
 
         return tollFee[m];
     }
 
     bool IsTollFreeVehicle(Vehicle vehicle)
     {
-        if (vehicle == null) return false;
-
         return TollFreeVehicleStrings.Contains(vehicle.GetVehicleType());
     }
 
     static bool IsTollFreeDate(DateTime date)
     {
-        int year = date.Year;
+        return IsWeekend(date) || IsPublicHoliday(date);
+    }
+
+    static bool IsWeekend(DateTime date)
+    {
+        return date.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday;
+    }
+
+    static bool IsPublicHoliday(DateTime date)
+    {
         int month = date.Month;
         int day = date.Day;
 
-        if (date.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday) 
+        // Fixed-date holidays.
+        if (FixedHolidays.Contains((date.Month, date.Day)))
             return true;
 
-        /*
-         * This seems very strange, the requirment states that holidays
-         * are toll free, but here it is only for the year 2013.
-         * Check with stakeholders what the intension is,
-         * since it would be a really bad breaking change to fix this.
-         */
-        if (year == 2013)
-        {
-            if (month == 1 && day == 1 ||
-                month == 3 && (day == 28 || day == 29) ||
-                month == 4 && (day == 1 || day == 30) ||
-                month == 5 && (day == 1 || day == 8 || day == 9) ||
-                month == 6 && (day == 5 || day == 6 || day == 21) ||
-                month == 7 ||
-                month == 11 && day == 1 ||
-                month == 12 && (day == 24 || day == 25 || day == 26 || day == 31))
-            {
-                return true;
-            }
-        }
         return false;
     }
 

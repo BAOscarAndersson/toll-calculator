@@ -81,6 +81,6 @@ public class TollCalculatorMultipleDatesTests
         int fee2023 = sut.GetTollFee(holiday2024, car);
 
         Assert.Equal(0, fee2013);
-        Assert.NotEqual(0, fee2023);
+        Assert.Equal(0, fee2023);
     }
 }
