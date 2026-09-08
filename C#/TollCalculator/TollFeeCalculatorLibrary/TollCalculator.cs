@@ -54,16 +54,33 @@ public class TollCalculator
         int hour = date.Hour;
         int minute = date.Minute;
 
-        if (hour == 6 && minute >= 0 && minute <= 29) return 8;
-        else if (hour == 6 && minute >= 30 && minute <= 59) return 13;
-        else if (hour == 7 && minute >= 0 && minute <= 59) return 18;
-        else if (hour == 8 && minute >= 0 && minute <= 29) return 13;
-        else if (hour >= 8 && hour <= 14 && minute >= 30 && minute <= 59) return 8;
-        else if (hour == 15 && minute >= 0 && minute <= 29) return 13;
-        else if (hour == 15 && minute >= 0 || hour == 16 && minute <= 59) return 18;
-        else if (hour == 17 && minute >= 0 && minute <= 59) return 13;
-        else if (hour == 18 && minute >= 0 && minute <= 29) return 8;
-        else return 0;
+        return GetTollFee(hour, minute);
+    }
+
+    int GetTollFee(int hour, int minute)
+    {
+        // Convert everything to total minutes from midnight
+        int m = (hour * 60) + minute;
+
+        return m switch
+        {
+            >= 360 and < 390 => 8,  // 06:00 - 06:29
+            >= 390 and < 420 => 13, // 06:30 - 06:59
+            >= 420 and < 480 => 18, // 07:00 - 07:59
+            >= 480 and < 510 => 13, // 08:00 - 08:29
+            >= 510 and < 540 => 8,  // 08:30 - 08:59
+            >= 570 and < 600 => 8,  // 09:30 - 09:59
+            >= 630 and < 660 => 8,  // 10:30 - 10:59
+            >= 690 and < 720 => 8,  // 11:30 - 11:59
+            >= 750 and < 780 => 8,  // 12:30 - 12:59
+            >= 810 and < 840 => 8,  // 13:30 - 13:59
+            >= 870 and < 900 => 8,  // 14:30 - 14:59
+            >= 900 and < 930 => 13, // 15:00 - 15:29
+            >= 930 and < 1020 => 18, // 15:30 - 16:59
+            >= 1020 and < 1080 => 13, // 17:00 - 17:59
+            >= 1080 and < 1110 => 8,  // 18:00 - 18:29
+            _ => 0
+        };
     }
 
     bool IsTollFreeVehicle(Vehicle vehicle)
