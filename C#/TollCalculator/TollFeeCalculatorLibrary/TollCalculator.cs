@@ -12,7 +12,7 @@ public class TollCalculator
      * @return - the total toll fee for that day
      */
 
-    public int GetTollFee(Vehicle vehicle, DateTime[] dates)
+    public int GetTollFee(IVehicle vehicle, DateTime[] dates)
     {
         /* This precondition is important and should
          * probably be guarded with the type system. */
@@ -22,8 +22,8 @@ public class TollCalculator
         if (vehicle.IsTollFreeVehicle()) return 0;
 
         var allFees = dates
-            .Select(x => (x, tollFees.FeeForDate(x)))
-            .GroupBy(d => d.Item1.Hour)
+            .Select(date => (date, tollFees.FeeForDate(date)))
+            .GroupBy(d => d.date.Hour)
             .Select(x => x.Max(y => y.Item2));
 
         int maxFee = Math.Min(allFees.Sum(), 60);
@@ -31,7 +31,7 @@ public class TollCalculator
         return maxFee;
     }
 
-    public int GetTollFee(DateTime date, Vehicle vehicle)
+    public int GetTollFee(DateTime date, IVehicle vehicle)
     {
         if (vehicle.IsTollFreeVehicle()) return 0;
 

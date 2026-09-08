@@ -18,7 +18,7 @@ static class DurationExtensions
             .GetValues<TollFreeVehicles>()
             .Select(x => x.ToString())];
 
-    extension(Vehicle vehicle)
+    extension(IVehicle vehicle)
     {
         public bool IsTollFreeVehicle()
         {

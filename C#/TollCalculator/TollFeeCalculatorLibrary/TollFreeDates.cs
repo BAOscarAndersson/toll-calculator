@@ -4,7 +4,7 @@ namespace TollFeeCalculatorLibrary;
 
 internal class TollFreeDates
 {
-    FrozenSet<DateOnly> allHolidays;
+    readonly FrozenSet<DateOnly> allHolidays;
 
     public TollFreeDates()
     {

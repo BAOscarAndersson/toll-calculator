@@ -6,9 +6,8 @@ internal class IsTollFreeVehicle
 
     public IsTollFreeVehicle()
     {
-        TollFreeVehicleStrings = Enum
+        TollFreeVehicleStrings = [.. Enum
             .GetValues<TollFreeVehicles>()
-            .Select(x => x.ToString())
-            .ToArray(); ;
+            .Select(x => x.ToString())];
     }
 }

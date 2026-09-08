@@ -1,6 +1,6 @@
 ﻿namespace TollFeeCalculatorLibrary;
 
-public interface Vehicle
+public interface IVehicle
 {
     string GetVehicleType();
 }

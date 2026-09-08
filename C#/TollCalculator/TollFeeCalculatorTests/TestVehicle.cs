@@ -2,7 +2,7 @@
 
 namespace TollFeeCalculatorTests;
 
-internal class TestVehicle(string VehicleType) : Vehicle
+internal class TestVehicle(string VehicleType) : IVehicle
 {
     readonly string vehicleType = VehicleType;
 
