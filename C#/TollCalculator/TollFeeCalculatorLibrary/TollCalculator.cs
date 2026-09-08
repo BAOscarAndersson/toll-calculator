@@ -2,7 +2,7 @@
 
 public class TollCalculator
 {
-    private string[] TollFreeVehicleStrings;
+    readonly string[] TollFreeVehicleStrings;
 
     public TollCalculator()
     {
@@ -66,21 +66,28 @@ public class TollCalculator
         else return 0;
     }
 
-    private bool IsTollFreeVehicle(Vehicle vehicle)
+    bool IsTollFreeVehicle(Vehicle vehicle)
     {
         if (vehicle == null) return false;
 
         return TollFreeVehicleStrings.Contains(vehicle.GetVehicleType());
     }
 
-    private static bool IsTollFreeDate(DateTime date)
+    static bool IsTollFreeDate(DateTime date)
     {
         int year = date.Year;
         int month = date.Month;
         int day = date.Day;
 
-        if (date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday) return true;
+        if (date.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday) 
+            return true;
 
+        /*
+         * This seems very strange, the requirment states that holidays
+         * are toll free, but here it is only for the year 2013.
+         * Check with stakeholders what the intension is,
+         * since it would be a really bad breaking change to fix this.
+         */
         if (year == 2013)
         {
             if (month == 1 && day == 1 ||
