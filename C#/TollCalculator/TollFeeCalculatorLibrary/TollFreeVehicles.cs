@@ -8,8 +8,6 @@ public enum TollFreeVehicles
     Diplomat = 3,
     Foreign = 4,
     Military = 5
-
-
 }
 
 static class DurationExtensions

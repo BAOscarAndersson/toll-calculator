@@ -25,10 +25,7 @@ internal class TollFreeDates
 
     bool IsPublicHoliday(DateOnly date)
     {
-        if (allHolidays.Contains(date))
-            return true;
-
-        return false;
+        return allHolidays.Contains(date);
     }
 
     static FrozenSet<DateOnly> PrecomputeHolidays(int startYear, int endYear)
@@ -69,7 +66,7 @@ internal class TollFreeDates
     {
         int nrOfDays = end.DayNumber - start.DayNumber + 1;
 
-        var holidaysInRange = Enumerable.Range(0, nrOfDays)
+        DateOnly holidaysInRange = Enumerable.Range(0, nrOfDays)
             .Select(start.AddDays)
             .First(d => d.DayOfWeek == DayOfWeek.Saturday);
 

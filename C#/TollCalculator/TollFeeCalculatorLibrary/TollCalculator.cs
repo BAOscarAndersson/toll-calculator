@@ -21,7 +21,7 @@ public class TollCalculator
 
         if (vehicle.IsTollFreeVehicle()) return 0;
 
-        var allFees = dates
+        IEnumerable<int> allFees = dates
             .Select(date => (date, tollFees.FeeForDate(date)))
             .GroupBy(d => d.date.Hour)
             .Select(x => x.Max(y => y.Item2));
@@ -36,15 +36,5 @@ public class TollCalculator
         if (vehicle.IsTollFreeVehicle()) return 0;
 
         return tollFees.FeeForDate(date);
-    }
-
-    public enum TollFreeVehicles
-    {
-        Motorbike = 0,
-        Tractor = 1,
-        Emergency = 2,
-        Diplomat = 3,
-        Foreign = 4,
-        Military = 5
     }
 }

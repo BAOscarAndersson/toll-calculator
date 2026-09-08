@@ -4,25 +4,25 @@ namespace TollFeeCalculatorTests;
 
 public class TollCalculatorMultipleDatesTests
 {
-    private readonly TollCalculator sut;
-    private readonly TestVehicle car;
-    private readonly TestVehicle tollFree;
+    readonly TollCalculator sut;
+    readonly TestVehicle car;
+    readonly TestVehicle tollFree;
 
     public TollCalculatorMultipleDatesTests()
     {
         sut = new TollCalculator();
         car = new TestVehicle("Car");
-        tollFree = new TestVehicle(TollCalculator.TollFreeVehicles.Emergency.ToString());
+        tollFree = new TestVehicle(TollFreeVehicles.Emergency.ToString());
     }
 
     [Fact]
     public void ShouldSumFeesFromDifferentHours()
     {
-        var dates = new[]
-        {
+        DateTime[] dates =
+        [
             new DateTime(2023, 10, 10, 7, 0, 0),  // 18 SEK
             new DateTime(2023, 10, 10, 15, 30, 0) // 18 SEK
-        };
+        ];
 
         int result = sut.GetTollFee(car, dates);
 
@@ -32,11 +32,11 @@ public class TollCalculatorMultipleDatesTests
     [Fact]
     public void SameHour_ShouldOnlyChargeOnceAtHighestRate()
     {
-        var dates = new[]
-        {
+        DateTime[] dates =
+        [
             new DateTime(2023, 10, 10, 7, 10, 0),
             new DateTime(2023, 10, 10, 7, 40, 0)
-        };
+        ];
 
         int result = sut.GetTollFee(car, dates);
 
@@ -46,13 +46,13 @@ public class TollCalculatorMultipleDatesTests
     [Fact]
     public void ShouldCapAtSixtySek()
     {
-        var dates = new[]
-        {
+        DateTime[] dates =
+        [
             new DateTime(2023, 10, 10, 7, 0, 0),
             new DateTime(2023, 10, 10, 15, 30, 0),
             new DateTime(2023, 10, 10, 16, 0, 0),
             new DateTime(2023, 10, 10, 17, 0, 0)
-        };
+        ];
 
         int result = sut.GetTollFee(car, dates);
 
