@@ -1,6 +1,4 @@
-﻿using static System.Runtime.InteropServices.JavaScript.JSType;
-
-namespace TollFeeCalculatorLibrary;
+﻿namespace TollFeeCalculatorLibrary;
 
 public class TollCalculator
 {
@@ -24,22 +22,13 @@ public class TollCalculator
         {
             return minutesFromMidnight switch
             {
-                >= 360 and < 390 => 8,  // 06:00 - 06:29
                 >= 390 and < 420 => 13, // 06:30 - 06:59
                 >= 420 and < 480 => 18, // 07:00 - 07:59
                 >= 480 and < 510 => 13, // 08:00 - 08:29
-                >= 510 and < 540 => 8,  // 08:30 - 08:59
-                >= 570 and < 600 => 8,  // 09:30 - 09:59
-                >= 630 and < 660 => 8,  // 10:30 - 10:59
-                >= 690 and < 720 => 8,  // 11:30 - 11:59
-                >= 750 and < 780 => 8,  // 12:30 - 12:59
-                >= 810 and < 840 => 8,  // 13:30 - 13:59
-                >= 870 and < 900 => 8,  // 14:30 - 14:59
                 >= 900 and < 930 => 13, // 15:00 - 15:29
                 >= 930 and < 1020 => 18, // 15:30 - 16:59
                 >= 1020 and < 1080 => 13, // 17:00 - 17:59
-                >= 1080 and < 1110 => 8,  // 18:00 - 18:29
-                _ => 0
+                _ => 8
             };
         }
     }
@@ -54,41 +43,28 @@ public class TollCalculator
 
     public int GetTollFee(Vehicle vehicle, DateTime[] dates)
     {
+        /* This precondition is important and should
+         * probably be guarded with the type system. */
+        if (dates.GroupBy(x => x.Date).Count() > 1)
+            throw new Exception("This should be a better exception!");
+
         if (IsTollFreeVehicle(vehicle)) return 0;
 
-        DateTime intervalStart = dates[0];
-        int totalFee = 0;
-        foreach (DateTime date in dates)
-        {
-            int nextFee = GetTollFee(date);
-            int tempFee = GetTollFee(intervalStart);
+        var allFees = dates
+            .Select(x => (x, GetTollFee(x)))
+            .GroupBy(d => d.Item1.Hour)
+            .Select(x => x.Max(y => y.Item2));
 
-            long diffInMillies = date.Millisecond - intervalStart.Millisecond;
-            long minutes = diffInMillies / 1000 / 60;
+        int maxFee = Math.Min(allFees.Sum(), 60);
 
-            if (minutes <= 60)
-            {
-                if (totalFee > 0) totalFee -= tempFee;
-                if (nextFee >= tempFee) tempFee = nextFee;
-                totalFee += tempFee;
-            }
-            else
-            {
-                totalFee += nextFee;
-            }
-        }
-        if (totalFee > 60) totalFee = 60;
-        return totalFee;
+        return maxFee;
     }
 
     public int GetTollFee(DateTime date, Vehicle vehicle)
     {
-        if (IsTollFreeDate(date) || IsTollFreeVehicle(vehicle)) return 0;
+        if (IsTollFreeVehicle(vehicle)) return 0;
 
-        int hour = date.Hour;
-        int minute = date.Minute;
-
-        return GetTollFee(hour, minute);
+        return GetTollFee(date);
     }
 
     int GetTollFee(DateTime date)
@@ -98,11 +74,6 @@ public class TollCalculator
         int hour = date.Hour;
         int minute = date.Minute;
 
-        return GetTollFee(hour, minute);
-    }
-
-    int GetTollFee(int hour, int minute)
-    {
         // Convert everything to total minutes from midnight
         int m = (hour * 60) + minute;
 
